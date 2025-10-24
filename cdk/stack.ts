@@ -71,6 +71,23 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
     //   },
     // });
 
+    // ========== Lambda Functions ==========
+
+    // Server App Lambda - API Handler
+    const serverAppLogGroup = new logs.LogGroup(this, getResourceId('ServerAppLogs'), {
+      logGroupName: `/aws/lambda/${getResourceName('ServerApp')}`,
+      retention: logs.RetentionDays.TWO_WEEKS,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const serverAppRole = new iam.Role(this, getResourceId('ServerAppRole'), {
+      roleName: `${getResourceName('ServerApp')}-role`,
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+      ],
+    });
+
     const serverAppFunction = new lambda.Function(this, getResourceId('ServerApp'), {
       functionName: getResourceName('ServerApp'),
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -78,12 +95,30 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
       handler: 'index.handler',
       memorySize: 2048,
       timeout: cdk.Duration.seconds(300),
+      role: serverAppRole,
+      logGroup: serverAppLogGroup,
       environment: {
         BASE_URL: '/api',
+        LOCALS_ACCESS_TOKEN: config.LOCALS_ACCESS_TOKEN,
         DATABASE_URL: stage === 'dev' ? config.DATABASE_DEV_URL : config.DATABASE_PROD_URL,
         AWS_SQS_USER_SCAN_QUEUE_URL: userFetchQueue.queueUrl,
         //AWS_SQS_USER_SCAN_GO_QUEUE_URL: userFetchGoQueue.queueUrl,
       },
+    });
+
+    // User Fetch Lambda - SQS Consumer
+    const userFetchLogGroup = new logs.LogGroup(this, getResourceId('UserFetchLogs'), {
+      logGroupName: `/aws/lambda/${getResourceName('UserFetch')}`,
+      retention: logs.RetentionDays.TWO_WEEKS,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const userFetchRole = new iam.Role(this, getResourceId('UserFetchRole'), {
+      roleName: `${getResourceName('UserFetch')}-role`,
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+      ],
     });
 
     const userFetchFunction = new lambda.Function(this, getResourceId('UserFetch'), {
@@ -94,7 +129,10 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
       handler: 'index.handler',
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),
+      role: userFetchRole,
+      logGroup: userFetchLogGroup,
       environment: {
+        LOCALS_ACCESS_TOKEN: config.LOCALS_ACCESS_TOKEN,
         DATABASE_URL: stage === 'dev' ? config.DATABASE_DEV_URL : config.DATABASE_PROD_URL,
       },
     });
@@ -160,30 +198,19 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, getResourceId('RestApi'), {
       restApiName: `LocalsScrapper-${stage}`,
       description: `LocalsScrapper API for ${stage} environment`,
-      domainName: {
-        domainName: props.domainName,
-        certificate,
-      },
+      deploy: false, // We'll create deployment manually
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key'],
         maxAge: cdk.Duration.days(1),
       },
-      deployOptions: {
-        stageName: stage,
-        metricsEnabled: true,
-        dataTraceEnabled: true,
-        loggingLevel: apigateway.MethodLoggingLevel.INFO,
-        accessLogDestination: new apigateway.LogGroupLogDestination(apiGatewayAccessLogGroup),
-        accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
-      },
     });
 
     // Grant API Gateway permission to invoke the Lambda function
     serverAppFunction.addPermission('ApiGatewayInvoke', {
       principal: new iam.ServicePrincipal('apigateway.amazonaws.com'),
-      sourceArn: `${api.arnForExecuteApi()}/*/*`,
+      sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:${api.restApiId}/${stage}/*/*`,
     });
 
     // Add root proxy to catch all paths
@@ -193,20 +220,55 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
     // Also handle root path
     api.root.addMethod('ANY', new apigateway.LambdaIntegration(serverAppFunction));
 
+    // Create deployment and stage manually with fixed names
+    const deployment = new apigateway.Deployment(this, getResourceId('Deployment'), {
+      api,
+    });
+
+    // Ensure deployment happens after methods are added
+    deployment.node.addDependency(proxyResource);
+    deployment.node.addDependency(api.root);
+
+    const apiStage = new apigateway.Stage(this, getResourceId('Stage'), {
+      stageName: stage,
+      deployment,
+      metricsEnabled: true,
+      dataTraceEnabled: true,
+      loggingLevel: apigateway.MethodLoggingLevel.INFO,
+      accessLogDestination: new apigateway.LogGroupLogDestination(apiGatewayAccessLogGroup),
+      accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields(),
+    });
+
+    // Create custom domain name
+    const domainName = new apigateway.DomainName(this, getResourceId('DomainName'), {
+      domainName: props.domainName,
+      certificate,
+      endpointType: apigateway.EndpointType.REGIONAL,
+      securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
+    });
+
+    // Create base path mapping explicitly
+    new apigateway.BasePathMapping(this, getResourceId('BasePathMapping'), {
+      domainName,
+      restApi: api,
+      stage: apiStage,
+      basePath: '', // Empty string maps to root path
+    });
+
     // For API Gateway v1, we need to use the domain name's regional properties
     new route53.CfnRecordSet(this, getResourceId('ApiAliasRecord'), {
       hostedZoneId: props.hostedZoneId,
       name: props.domainName,
       type: 'A',
       aliasTarget: {
-        dnsName: api.domainName!.domainNameAliasDomainName,
-        hostedZoneId: api.domainName!.domainNameAliasHostedZoneId,
+        dnsName: domainName.domainNameAliasDomainName,
+        hostedZoneId: domainName.domainNameAliasHostedZoneId,
         evaluateTargetHealth: false,
       },
     });
 
     new cdk.CfnOutput(this, `CustomDomainUrl-${stage}`, {
-      value: `https://${api.domainName!.domainName}`,
+      value: `https://${props.domainName}`,
       description: 'Custom domain URL for the API',
     });
   }

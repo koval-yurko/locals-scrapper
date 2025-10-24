@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"log"
 	"net/http"
 
@@ -67,7 +68,7 @@ func (*LocalsAPI) executeRequest(url string, options RequestOptions) ([]byte, er
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to execute request")
 	}
-    const accessToken = os.Getenv("LOCALS_ACCESS_TOKEN")
+    accessToken := os.Getenv("LOCALS_ACCESS_TOKEN")
 	req.Header.Add("Authorization", fmt.Sprintf("Token %s", accessToken))
 
 	client := &http.Client{}

@@ -13,7 +13,7 @@ export const config = cleanEnv(process.env, {
   CERTIFICATE_ARN: str(),
   DATABASE_DEV_URL: str(),
   DATABASE_PROD_URL: str(),
-  LOCALS_ACCESS_TOKEN: str()
+  LOCALS_ACCESS_TOKEN: str(),
   // BOOL: bool({ devDefault: true }),
   // NUM: num({ devDefault: 180 }),
 });
