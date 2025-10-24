@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// For Migrate on Lambda:
+// PRISMA_CLI_BINARY_TARGETS=native,rhel-openssl-3.0.x
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  output   = "./generated"
+}
+
+generator client-go {
+  provider = "go run github.com/steebchen/prisma-client-go"
+  binaryTargets = []
+
+  // "native", "rhel-openssl-3.0.x", "rhel-openssl-3.0.x", "linux-arm64-openssl-3.0.x", "darwin-arm64"
+
+  output   = "../../../lambda/user-fetch-go/db/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  name      String?
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  localsId      String?
+  firstName     String?
+  lastName      String?
+  username      String? @unique
+  age           Int?
+  gender        String?
+  description   String?
+  occupation    String?
+  country       String?
+  city          String?
+  avatarPicture String?
+
+  photos        Json?
+
+  shareLink          String?
+  instagramUsername  String?
+  linkedinLink       String?
+
+  votes             Int?
+  height            Int?
+}

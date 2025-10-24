@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  locals_scrapper_db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: locals-scrapper
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - '5434:5432'
+  mock_aws_server:
+    image: localstack/localstack:latest
+    ports:
+      - '4566:4566'
+    environment:
+      - DEFAULT_REGION=eu-central-1
+      - SERVICES=sqs

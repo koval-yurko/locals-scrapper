@@ -1,0 +1,2 @@
+shared/repositories/prisma
+lambda/server-app/openapi/swagger.json

@@ -1,0 +1,642 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"JsonValue": {
+				"anyOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "number",
+						"format": "double"
+					},
+					{
+						"type": "boolean"
+					},
+					{
+						"$ref": "#/components/schemas/JsonObject"
+					},
+					{
+						"$ref": "#/components/schemas/JsonArray"
+					}
+				],
+				"nullable": true,
+				"description": "From https://github.com/sindresorhus/type-fest/\r\nMatches any valid JSON value."
+			},
+			"JsonObject": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/JsonValue"
+				},
+				"type": "object",
+				"description": "From https://github.com/sindresorhus/type-fest/\r\nMatches a JSON object.\r\nThis type can be useful to enforce some input to be JSON-compatible or as a super-type to be extended from."
+			},
+			"JsonArray": {
+				"description": "From https://github.com/sindresorhus/type-fest/\r\nMatches a JSON array.",
+				"properties": {},
+				"type": "object",
+				"additionalProperties": true
+			},
+			"VoteUserParams": {
+				"properties": {
+					"vote": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"vote"
+				],
+				"type": "object"
+			},
+			"ScanEventParams": {
+				"properties": {
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object"
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "Locals Scrapper API",
+		"version": "1.0.0"
+	},
+	"paths": {
+		"/users": {
+			"get": {
+				"operationId": "GetUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"count": {
+											"type": "number",
+											"format": "double"
+										},
+										"items": {
+											"items": {
+												"properties": {
+													"height": {
+														"type": "number",
+														"format": "double"
+													},
+													"votes": {
+														"type": "number",
+														"format": "double"
+													},
+													"linkedinLink": {
+														"type": "string"
+													},
+													"instagramUsername": {
+														"type": "string"
+													},
+													"shareLink": {
+														"type": "string"
+													},
+													"photos": {
+														"$ref": "#/components/schemas/JsonValue"
+													},
+													"avatarPicture": {
+														"type": "string"
+													},
+													"city": {
+														"type": "string"
+													},
+													"country": {
+														"type": "string"
+													},
+													"occupation": {
+														"type": "string"
+													},
+													"description": {
+														"type": "string"
+													},
+													"gender": {
+														"type": "string"
+													},
+													"age": {
+														"type": "number",
+														"format": "double"
+													},
+													"username": {
+														"type": "string"
+													},
+													"lastName": {
+														"type": "string"
+													},
+													"firstName": {
+														"type": "string"
+													},
+													"localsId": {
+														"type": "string"
+													},
+													"id": {
+														"type": "number",
+														"format": "double"
+													}
+												},
+												"required": [
+													"height",
+													"votes",
+													"linkedinLink",
+													"instagramUsername",
+													"shareLink",
+													"photos",
+													"avatarPicture",
+													"city",
+													"country",
+													"occupation",
+													"description",
+													"gender",
+													"age",
+													"username",
+													"lastName",
+													"firstName",
+													"localsId",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"count",
+										"items"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"default": 25,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortField",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "filerField",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "filerOperator",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "filerValue",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "nameSearch",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "citySearch",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "genderSearch",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "voteSearch",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ageFrom",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ageTo",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "heightFrom",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "heightTo",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/users/{userId}": {
+			"get": {
+				"operationId": "GetUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"height": {
+											"type": "number",
+											"format": "double"
+										},
+										"votes": {
+											"type": "number",
+											"format": "double"
+										},
+										"linkedinLink": {
+											"type": "string"
+										},
+										"instagramUsername": {
+											"type": "string"
+										},
+										"shareLink": {
+											"type": "string"
+										},
+										"photos": {
+											"$ref": "#/components/schemas/JsonValue"
+										},
+										"avatarPicture": {
+											"type": "string"
+										},
+										"city": {
+											"type": "string"
+										},
+										"country": {
+											"type": "string"
+										},
+										"occupation": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										},
+										"gender": {
+											"type": "string"
+										},
+										"age": {
+											"type": "number",
+											"format": "double"
+										},
+										"username": {
+											"type": "string"
+										},
+										"lastName": {
+											"type": "string"
+										},
+										"firstName": {
+											"type": "string"
+										},
+										"localsId": {
+											"type": "string"
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"height",
+										"votes",
+										"linkedinLink",
+										"instagramUsername",
+										"shareLink",
+										"photos",
+										"avatarPicture",
+										"city",
+										"country",
+										"occupation",
+										"description",
+										"gender",
+										"age",
+										"username",
+										"lastName",
+										"firstName",
+										"localsId",
+										"id"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/users/{userId}/vote": {
+			"post": {
+				"operationId": "VoteUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"height": {
+											"type": "number",
+											"format": "double"
+										},
+										"votes": {
+											"type": "number",
+											"format": "double"
+										},
+										"linkedinLink": {
+											"type": "string"
+										},
+										"instagramUsername": {
+											"type": "string"
+										},
+										"shareLink": {
+											"type": "string"
+										},
+										"photos": {
+											"$ref": "#/components/schemas/JsonValue"
+										},
+										"avatarPicture": {
+											"type": "string"
+										},
+										"city": {
+											"type": "string"
+										},
+										"country": {
+											"type": "string"
+										},
+										"occupation": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										},
+										"gender": {
+											"type": "string"
+										},
+										"age": {
+											"type": "number",
+											"format": "double"
+										},
+										"username": {
+											"type": "string"
+										},
+										"lastName": {
+											"type": "string"
+										},
+										"firstName": {
+											"type": "string"
+										},
+										"localsId": {
+											"type": "string"
+										},
+										"id": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"height",
+										"votes",
+										"linkedinLink",
+										"instagramUsername",
+										"shareLink",
+										"photos",
+										"avatarPicture",
+										"city",
+										"country",
+										"occupation",
+										"description",
+										"gender",
+										"age",
+										"username",
+										"lastName",
+										"firstName",
+										"localsId",
+										"id"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/VoteUserParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tasks": {
+			"get": {
+				"operationId": "GetTasks",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"count": {
+											"type": "number",
+											"format": "double"
+										},
+										"items": {
+											"items": {
+												"properties": {
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "number",
+														"format": "double"
+													}
+												},
+												"required": [
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"count",
+										"items"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/tasks/scan-event": {
+			"post": {
+				"operationId": "ScanEvent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"scanned": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"scanned"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScanEventParams"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/api"
+		}
+	]
+}
