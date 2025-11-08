@@ -9,7 +9,7 @@ export const config = cleanEnv(process.env, {
   DATABASE_URL: str({
     devDefault: 'postgresql://test:test@localhost:5434/locals-scrapper',
   }),
-  LOCALS_ACCESS_TOKEN: str()
+  LOCALS_ACCESS_TOKEN: str(),
   // BOOL: bool({ devDefault: true }),
   // NUM: num({ devDefault: 180 }),
 });

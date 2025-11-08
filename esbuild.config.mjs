@@ -27,9 +27,7 @@ const settings = {
       resolveFrom: 'cwd',
       assets: {
         from: ['./lambda/server-app/openapi/swagger.json'],
-        to: [
-          './dist/lambda/server-app/openapi/',
-        ],
+        to: ['./dist/lambda/server-app/openapi/'],
       },
     }),
   ],

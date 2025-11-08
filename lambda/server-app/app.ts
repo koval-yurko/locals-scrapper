@@ -1,4 +1,10 @@
-import express, { json, urlencoded, Request, Response, NextFunction } from 'express';
+import express, {
+  json,
+  urlencoded,
+  Request,
+  Response,
+  NextFunction,
+} from 'express';
 import cors from 'cors';
 import { config } from './config';
 import { RegisterRoutes } from './openapi/routes';
@@ -9,9 +15,14 @@ app.use(
   cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key'],
+    allowedHeaders: [
+      'Content-Type',
+      'X-Amz-Date',
+      'Authorization',
+      'X-Api-Key',
+    ],
     credentials: false,
-  })
+  }),
 );
 
 app.use(
@@ -42,6 +53,6 @@ app.use((_req, res) => {
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error'
+    error: err.message || 'Internal Server Error',
   });
 });

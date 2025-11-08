@@ -28,9 +28,9 @@ const config = {
       },
       securityDefinitions: {
         ApiKeyAuth: {
-          type: "apiKey",
-          in: "header",
-          name: "X-API-KEY"
+          type: 'apiKey',
+          in: 'header',
+          name: 'X-API-KEY',
         },
         JWTAuth: {
           type: 'http',
