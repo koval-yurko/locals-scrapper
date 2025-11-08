@@ -21,7 +21,10 @@
     "prisma:generate": "prisma generate",
     "prisma:go:prefetch": "go run github.com/steebchen/prisma-client-go prefetch",
     "postinstall": "npm run prisma:generate",
-    "openapi:generate": "ts-node ./scripts/generateOpenAPI.ts",
+    "openapi:generate:old": "ts-node ./scripts/generateOpenAPI.ts",
+    "openapi:generate": "npm run openapi:generate:routes && npm run openapi:generate:spec",
+    "openapi:generate:routes": "tsoa routes -c lambda/server-app/tsoa.json",
+    "openapi:generate:spec": "tsoa spec -c lambda/server-app/tsoa.json",
     "setup-localstack": "./scripts/setup-localstack.sh"
   },
   "devDependencies": {

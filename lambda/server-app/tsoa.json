@@ -1,0 +1,38 @@
+{
+  "entryFile": "lambda/server-app/app.ts",
+  "noImplicitAdditionalProperties": "ignore",
+  "controllerPathGlobs": ["lambda/server-app/controllers/**/*Controller.ts"],
+  "iocModule": "lambda/server-app/openapi/ioc.ts",
+  "spec": {
+    "outputDirectory": "lambda/server-app/openapi",
+    "specVersion": 3,
+    "basePath": "/api",
+    "spec": {
+      "info": {
+        "title": "Locals Scrapper API",
+        "version": "1.0.0"
+      }
+    },
+    "securityDefinitions": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-KEY"
+      },
+      "JWTAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Supabase JWT token"
+      }
+    }
+  },
+  "routes": {
+    "basePath": "/api",
+    "routesDir": "lambda/server-app/openapi",
+    "authenticationModule": "lambda/server-app/openapi/auth.ts",
+    "iocModule": "lambda/server-app/openapi/ioc.ts",
+    "middleware": "express",
+    "bodyCoercion": true
+  }
+}

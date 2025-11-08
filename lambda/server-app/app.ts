@@ -35,7 +35,7 @@ app.use(json());
 RegisterRoutes(app);
 
 // Serve swagger.json at /api
-app.get(`${config.BASE_URL}`, (_req, res) => {
+app.get(`${config.BASE_URL}/swagger.json`, (_req, res) => {
   res.sendFile('./swagger.json', { root: `${__dirname}/openapi` });
 });
 

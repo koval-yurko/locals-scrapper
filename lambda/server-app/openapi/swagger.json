@@ -67,7 +67,19 @@
 				"type": "object"
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"ApiKeyAuth": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "X-API-KEY"
+			},
+			"JWTAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT",
+				"description": "Supabase JWT token"
+			}
+		}
 	},
 	"info": {
 		"title": "Locals Scrapper API",
@@ -650,18 +662,5 @@
 		{
 			"url": "/api"
 		}
-	],
-	"securityDefinitions": {
-		"ApiKeyAuth": {
-			"type": "apiKey",
-			"in": "header",
-			"name": "X-API-KEY"
-		},
-		"JWTAuth": {
-			"type": "http",
-			"scheme": "bearer",
-			"bearerFormat": "JWT",
-			"description": "JWT token"
-		}
-	}
+	]
 }
