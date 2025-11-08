@@ -1,4 +1,4 @@
-import express, { json, urlencoded } from 'express';
+import express, { json, urlencoded, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { config } from './config';
 import { RegisterRoutes } from './openapi/routes';
@@ -39,7 +39,7 @@ app.use((_req, res) => {
 });
 
 // Error handler
-app.use((err: any, _req: any, res: any, _next: any) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error'

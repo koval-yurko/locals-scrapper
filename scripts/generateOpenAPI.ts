@@ -26,6 +26,19 @@ const config = {
         title: 'Locals Scrapper API',
         version: '1.0.0',
       },
+      securityDefinitions: {
+        ApiKeyAuth: {
+          type: "apiKey",
+          in: "header",
+          name: "X-API-KEY"
+        },
+        JWTAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'JWT token',
+        },
+      },
     },
   };
 
@@ -41,6 +54,7 @@ const config = {
     noImplicitAdditionalProperties: 'ignore',
     bodyCoercion: true,
     iocModule: 'lambda/server-app/openapi/ioc',
+    authenticationModule: 'lambda/server-app/openapi/auth',
   };
 
   await generateRoutes(routeOptions);

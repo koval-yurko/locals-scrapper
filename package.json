@@ -30,6 +30,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "22.7.9",
     "aws-cdk": "2.173.2",
     "aws-cdk-lib": "2.173.2",
@@ -58,6 +59,7 @@
     "dotenv": "^16.4.7",
     "envalid": "^8.0.0",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "serverless-http": "^3.2.0"
   },
   "prisma": {

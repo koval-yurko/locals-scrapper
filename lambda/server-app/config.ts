@@ -16,7 +16,9 @@ export const config = cleanEnv(process.env, {
     devDefault:
       'http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/user-scan',
   }),
-  LOCALS_ACCESS_TOKEN: str()
+  LOCALS_ACCESS_TOKEN: str(),
+  SUPABASE_JWT_SECRET: str(),
+  VALID_API_KEYS: str(),
   // AWS_SQS_USER_SCAN_GO_QUEUE_URL: str({
   //   devDefault:
   //     'http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/user-scan-go',

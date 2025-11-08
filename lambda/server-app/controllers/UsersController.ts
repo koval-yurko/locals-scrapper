@@ -1,4 +1,13 @@
-import { Controller, Route, Post, Get, Body, Query, Path } from 'tsoa';
+import {
+  Controller,
+  Route,
+  Post,
+  Get,
+  Body,
+  Query,
+  Path,
+  Security,
+} from 'tsoa';
 import { UserRepository } from '../../../shared/repositories/UserRepository';
 
 type VoteUserParams = {
@@ -14,6 +23,7 @@ export class UsersController extends Controller {
     this.userRepository = userRepository;
   }
 
+  @Security('JWTAuth')
   @Get()
   public async getUsers(
     @Query('page') page: number = 1,

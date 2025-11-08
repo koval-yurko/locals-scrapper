@@ -185,7 +185,11 @@
 						}
 					}
 				},
-				"security": [],
+				"security": [
+					{
+						"JWTAuth": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -591,7 +595,11 @@
 						}
 					}
 				},
-				"security": [],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -619,7 +627,11 @@
 						}
 					}
 				},
-				"security": [],
+				"security": [
+					{
+						"ApiKeyAuth": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -638,5 +650,18 @@
 		{
 			"url": "/api"
 		}
-	]
+	],
+	"securityDefinitions": {
+		"ApiKeyAuth": {
+			"type": "apiKey",
+			"in": "header",
+			"name": "X-API-KEY"
+		},
+		"JWTAuth": {
+			"type": "http",
+			"scheme": "bearer",
+			"bearerFormat": "JWT",
+			"description": "JWT token"
+		}
+	}
 }

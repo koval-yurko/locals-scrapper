@@ -1,4 +1,4 @@
-import { Controller, Route, Get, Post, Body } from 'tsoa';
+import { Controller, Route, Get, Post, Body, Security } from 'tsoa';
 import { TaskRepository } from '../../../shared/repositories/TaskRepository';
 import { pushUserScanMessage } from '../../../shared/sqs';
 import { LocalsAPI } from '../../../shared/locals';
@@ -24,12 +24,14 @@ export class TasksController extends Controller {
     this.locals = locals;
   }
 
+  @Security('ApiKeyAuth')
   @Get()
   async getTasks() {
     const items = await this.taskRepository.getTasks();
     return { items, count: items.length };
   }
 
+  @Security('ApiKeyAuth')
   @Post('scan-event')
   async scanEvent(@Body() body: ScanEventParams) {
     const state = {
@@ -56,15 +58,24 @@ export class TasksController extends Controller {
 
           // Validate response structure
           if (!participants || !Array.isArray(participants.results)) {
-            console.error('Invalid response structure from getEventParticipants', {
-              eventId,
-              page: state.page,
-              participants,
-            });
+            console.error(
+              'Invalid response structure from getEventParticipants',
+              {
+                eventId,
+                page: state.page,
+                participants,
+              },
+            );
             throw new Error('Invalid response structure from API');
           }
 
-          console.log('Scanning participants', eventId, state.page, 'count:', participants.results.length);
+          console.log(
+            'Scanning participants',
+            eventId,
+            state.page,
+            'count:',
+            participants.results.length,
+          );
 
           for (const participant of participants.results) {
             // Validate participant structure
@@ -102,7 +113,7 @@ export class TasksController extends Controller {
           if (!participants.next) {
             break;
           }
-          
+
           state.page++;
         } catch (apiError) {
           console.error('Failed to fetch participants for page', {
@@ -110,17 +121,19 @@ export class TasksController extends Controller {
             page: state.page,
             error: apiError,
           });
-          
+
           // If it's a rate limit or temporary error, we could retry
           // For now, we'll break to avoid infinite loops
-          if (apiError instanceof Error && 
-              (apiError.message.includes('rate limit') || 
-               apiError.message.includes('429') ||
-               apiError.message.includes('timeout'))) {
+          if (
+            apiError instanceof Error &&
+            (apiError.message.includes('rate limit') ||
+              apiError.message.includes('429') ||
+              apiError.message.includes('timeout'))
+          ) {
             console.log('Rate limit or timeout detected, stopping scan');
             break;
           }
-          
+
           // For other errors, we'll continue to the next page if possible
           state.page++;
           continue;
