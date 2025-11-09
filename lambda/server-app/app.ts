@@ -51,8 +51,11 @@ app.use((_req, res) => {
 
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Error:', err);
-  res.status(err.status || 500).json({
+  const errorStatus = err.status || 500;
+  if (errorStatus >= 500) {
+    console.error('Server Error:', err);
+  }
+  res.status(errorStatus).json({
     error: err.message || 'Internal Server Error',
   });
 });

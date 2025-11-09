@@ -1,8 +1,9 @@
 import { Request } from 'express';
-import jwt from 'jsonwebtoken';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { config } from '../config';
 
 const VALID_API_KEYS = new Set(config.VALID_API_KEYS.split(','));
+const SUPABASE_JWT_KEYS = createRemoteJWKSet(new URL(config.JWT_DISCOVERY_URL));
 
 export interface AuthenticatedUser {
   id: string;
@@ -44,11 +45,8 @@ export async function expressAuthentication(
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     try {
-      // Verify and decode the JWT token using Supabase JWT secret
-      const decoded = jwt.verify(
-        token,
-        config.SUPABASE_JWT_SECRET,
-      ) as SupabaseJWTPayload;
+      const verifyResult = await jwtVerify(token, SUPABASE_JWT_KEYS);
+      const decoded = verifyResult.payload as SupabaseJWTPayload;
 
       // Extract user information from JWT payload
       const user: AuthenticatedUser = {
@@ -69,15 +67,7 @@ export async function expressAuthentication(
 
       return user;
     } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError) {
-        throw new Error('Invalid token signature');
-      } else if (error instanceof jwt.TokenExpiredError) {
-        throw new Error('Token has expired');
-      } else if (error instanceof jwt.NotBeforeError) {
-        throw new Error('Token not yet valid');
-      } else {
-        throw new Error('Invalid or expired token');
-      }
+      throw new Error('Invalid or expired token', { cause: error });
     }
   }
 
