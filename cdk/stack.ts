@@ -111,6 +111,7 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
         timeout: cdk.Duration.seconds(300),
         role: serverAppRole,
         logGroup: serverAppLogGroup,
+        reservedConcurrentExecutions: 10,
         environment: {
           BASE_URL: '/api',
           LOCALS_ACCESS_TOKEN: config.LOCALS_ACCESS_TOKEN,

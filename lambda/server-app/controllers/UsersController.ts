@@ -108,6 +108,7 @@ export class UsersController extends Controller {
     return { items, count };
   }
 
+  @Security('JWTAuth')
   @Get('{userId}')
   public async getUser(@Path() userId: number) {
     const user = await this.userRepository.getUser({
@@ -116,6 +117,7 @@ export class UsersController extends Controller {
     return user;
   }
 
+  @Security('JWTAuth')
   @Post('{userId}/vote')
   public async voteUser(@Path() userId: number, @Body() body: VoteUserParams) {
     const user = await this.userRepository.voteUser({
