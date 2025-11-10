@@ -15,7 +15,8 @@ export const config = cleanEnv(process.env, {
   DATABASE_PROD_URL: str(),
   LOCALS_ACCESS_TOKEN: str(),
   VALID_API_KEYS: str(),
-  SUPABASE_JWT_SECRET: str(),
+  JWT_KEYS_ISSUER: str(),
+  JWT_KEYS_AUDIENCE: str(),
   // BOOL: bool({ devDefault: true }),
   // NUM: num({ devDefault: 180 }),
 });

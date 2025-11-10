@@ -14,7 +14,7 @@
     "lint": "eslint . ",
     "format": "prettier --write .",
     "cdk:synth": "cdk synth",
-    "cdk:bootstrap": "cdk bootstrap",
+    "cdk:bootstrap": "AWS_REGION=eu-central-1 cdk bootstrap",
     "cdk:deploy:dev": "npm run build && npm run build:go && AWS_REGION=eu-central-1 cdk deploy LocalsScrapperDevStack",
     "cdk:deploy:prod": "npm run build && npm run build:go && AWS_REGION=eu-central-1 cdk deploy LocalsScrapperProdStack",
     "cdk:destroy": "cdk destroy --all",

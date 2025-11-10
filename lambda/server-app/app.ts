@@ -1,13 +1,15 @@
 import express, {
   json,
   urlencoded,
+  NextFunction,
   Request,
   Response,
-  NextFunction,
 } from 'express';
 import cors from 'cors';
 import { config } from './config';
 import { RegisterRoutes } from './openapi/routes';
+import { errorHandler } from './middleware/error-handler';
+import { NotFoundError } from './errors/http-errors';
 
 export const app = express();
 
@@ -45,17 +47,9 @@ app.get('/', (_req, res) => {
 });
 
 // 404 handler for unmatched routes
-app.use((_req, res) => {
-  res.status(404).json({ error: 'Not Found' });
+app.use((_req: Request, _res: Response, next: NextFunction) => {
+  next(new NotFoundError('Route not found'));
 });
 
-// Error handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const errorStatus = err.status || 500;
-  if (errorStatus >= 500) {
-    console.error('Server Error:', err);
-  }
-  res.status(errorStatus).json({
-    error: err.message || 'Internal Server Error',
-  });
-});
+// Error handler - must be the last middleware
+app.use(errorHandler);

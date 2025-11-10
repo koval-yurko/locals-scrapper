@@ -120,7 +120,8 @@ export class LocalsScrapperInfraStack extends cdk.Stack {
               ? config.DATABASE_DEV_URL
               : config.DATABASE_PROD_URL,
           VALID_API_KEYS: config.VALID_API_KEYS,
-          SUPABASE_JWT_SECRET: config.SUPABASE_JWT_SECRET,
+          JWT_KEYS_ISSUER: config.JWT_KEYS_ISSUER,
+          JWT_KEYS_AUDIENCE: config.JWT_KEYS_AUDIENCE,
           AWS_SQS_USER_SCAN_QUEUE_URL: userFetchQueue.queueUrl,
           //AWS_SQS_USER_SCAN_GO_QUEUE_URL: userFetchGoQueue.queueUrl,
         },

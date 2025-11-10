@@ -1,29 +1,30 @@
 import { Request } from 'express';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { config } from '../config';
+import {
+  HttpError,
+  UnauthorizedError,
+  ForbiddenError,
+  BadRequestError,
+} from '../errors/http-errors';
 
 const VALID_API_KEYS = new Set(config.VALID_API_KEYS.split(','));
-const SUPABASE_JWT_KEYS = createRemoteJWKSet(new URL(config.JWT_DISCOVERY_URL));
+const JWT_KEYS = createRemoteJWKSet(
+  new URL(config.JWT_KEYS_ISSUER + '.well-known/jwks.json'),
+);
+
+const roles = {
+  ADMINS: 'Admins',
+};
 
 export interface AuthenticatedUser {
   id: string;
-  email?: string;
-  role?: string;
-  [key: string]: unknown;
+  roles: string[];
 }
 
-interface SupabaseJWTPayload {
+interface JWTPayload {
   sub: string;
-  email?: string;
-  role?: string;
-  app_metadata?: {
-    role?: string;
-    [key: string]: unknown;
-  };
-  user_metadata?: {
-    [key: string]: never;
-  };
-  [key: string]: unknown;
+  'https://api.locals.kovalchuk.work/roles': string[] | undefined;
 }
 
 /**
@@ -39,35 +40,36 @@ export async function expressAuthentication(
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new Error('Missing or invalid Authorization header');
+      throw new UnauthorizedError('Missing or invalid Authorization header');
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     try {
-      const verifyResult = await jwtVerify(token, SUPABASE_JWT_KEYS);
-      const decoded = verifyResult.payload as SupabaseJWTPayload;
+      const verifyResult = await jwtVerify<JWTPayload>(token, JWT_KEYS, {
+        issuer: config.JWT_KEYS_ISSUER,
+        audience: config.JWT_KEYS_AUDIENCE,
+      });
+      const decoded = verifyResult.payload;
 
       // Extract user information from JWT payload
-      const user: AuthenticatedUser = {
+      const user = {
         id: decoded.sub,
-        email: decoded.email,
-        role: decoded.role || decoded.app_metadata?.role,
-        ...decoded.user_metadata,
+        roles: decoded['https://api.locals.kovalchuk.work/roles'] || [],
       };
 
-      // Optional: Check scopes if required
-      if (scopes && scopes.length > 0) {
-        const userRole = user.role;
-
-        if (!userRole || !scopes.includes(userRole)) {
-          throw new Error('Insufficient permissions');
-        }
+      if (!user.roles.includes(roles.ADMINS)) {
+        throw new ForbiddenError('Admin role required');
       }
 
       return user;
     } catch (error) {
-      throw new Error('Invalid or expired token', { cause: error });
+      // Re-throw HTTP errors as-is
+      if (error instanceof HttpError) {
+        throw error;
+      }
+      // Wrap JWT verification errors as Unauthorized with cause
+      throw new UnauthorizedError(`Invalid or expired token`, { cause: error });
     }
   }
 
@@ -79,24 +81,24 @@ export async function expressAuthentication(
       (request.query.apiKey as string);
 
     if (!apiKey) {
-      throw new Error(
+      throw new UnauthorizedError(
         "API key is required. Please provide it in the 'X-API-KEY' header or 'apiKey' query parameter.",
       );
     }
 
     if (typeof apiKey !== 'string') {
-      throw new Error('API key must be a string.');
+      throw new BadRequestError('API key must be a string.');
     }
 
     if (VALID_API_KEYS.has(apiKey)) {
       return {
-        id: apiKey,
-        email: `api-key@user.admin`,
+        id: `api-key|${apiKey}`,
+        roles: [roles.ADMINS],
       };
-    } else {
-      throw new Error('Invalid API key. Please check your credentials.');
     }
+
+    throw new UnauthorizedError('Invalid API key.');
   }
 
-  throw new Error('Unknown security scheme');
+  throw new BadRequestError('Unknown security scheme');
 }

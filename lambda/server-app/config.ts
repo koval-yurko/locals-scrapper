@@ -17,7 +17,8 @@ export const config = cleanEnv(process.env, {
       'http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/user-scan',
   }),
   LOCALS_ACCESS_TOKEN: str(),
-  JWT_DISCOVERY_URL: str(),
+  JWT_KEYS_ISSUER: str(),
+  JWT_KEYS_AUDIENCE: str({ default: '' }), // Optional audience for JWT validation
   VALID_API_KEYS: str(),
   // AWS_SQS_USER_SCAN_GO_QUEUE_URL: str({
   //   devDefault:
